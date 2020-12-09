@@ -11,8 +11,10 @@ void add_node(intrusive_list_s* ptr_to_list, intrusive_node_s* ptr_to_new_node){
         ptr_to_list->head = ptr_to_new_node;
         ptr_to_new_node->next = NULL;
         ptr_to_new_node->prev = NULL;
+
         return;
     }
+
     /* Get the pointer to the current first node */
     intrusive_node_s* ptr_to_node = ptr_to_list->head;
     /* Set new first node */
@@ -22,54 +24,43 @@ void add_node(intrusive_list_s* ptr_to_list, intrusive_node_s* ptr_to_new_node){
     /* Old first node now goes after new first node */
     ptr_to_node->prev = ptr_to_list->head;
 }
-void remove_node(intrusive_list_s* ptr_to_list, intrusive_node_s* ptr_to_old_node) {
-    /* Get the pointer to the first node */
-    intrusive_node_s* ptr_to_node = ptr_to_old_node;
-    /* If it's null, then the node isn't in list */
-    //while ( ptr_to_node != ptr_to_old_node && ptr_to_node->next != NULL ){
-      //  ptr_to_node = ptr_to_node->next;
-    //}
-    if ( ptr_to_node != NULL ){
-        /* Get the pointer to the previous node */
-        intrusive_node_s* ptr_prev = ptr_to_node->prev;
-        /* Get the pointer to the next node */
-        intrusive_node_s* ptr_next = ptr_to_node->next;
-        /* If this node is last */
-        if( ptr_next == NULL ){
-            /*If the current node isn't the last node in the list*/
-            if ( ptr_prev != NULL )
-                /* Previous node is the last one now */
-            ptr_prev->next = NULL;
-            else {
-                /* List is empty now, last node was removed */
-                ptr_to_list->head = NULL;
-            }
-        }
-        /* If this node is first */
-        else if ( ptr_prev == NULL ){
-            /* Next node is the first one now */
-            ptr_next->prev = NULL;
-            /* That's why we change the head */
-            ptr_to_list->head = ptr_next;
-        }
-        else{
-            /* Connect the previous and the next node around the node to delete */
-            ptr_next->prev = ptr_prev;
-            ptr_prev->next = ptr_next;
-        }
+void remove_node(intrusive_list_s* ptr_to_list, intrusive_node_s* ptr_to_node){
+    /* Get the pointers to the next and previous nodes */
+    intrusive_node_s* ptr_next = ptr_to_node->next;
+    intrusive_node_s* ptr_prev = ptr_to_node->prev;
+    
+    /* Node placed between two other nodes */
+    if (ptr_next != NULL && ptr_prev != NULL){
+        ptr_prev->next = ptr_next;
+        ptr_next->prev = ptr_prev;
     }
+
+    /* Node is the first in the list */
+    if (ptr_next != NULL){
+        ptr_next->prev = NULL;
+        ptr_to_list->head = ptr_next;
+
+        return;
+    }
+    
+    /* Node is the last in the list */
+    if (ptr_prev != NULL){
+        ptr_prev->next = NULL;
+
+        return;
+    }
+
+    /* There is only one node in the list */
+    ptr_to_list->head = NULL;
 }
 
 int get_length(intrusive_list_s* ptr_to_list){
     /* Get the pointer to the first node */
     intrusive_node_s* ptr_to_node = ptr_to_list->head;
-    /* If pointer == NULL, then we don't have nodes, return 0 */
-    if ( ptr_to_node == NULL ) return 0;
+
     int length = 0;
-    /* Count till the node.next == NULL */
-    while( ptr_to_node != NULL ){
-        length++;
-        ptr_to_node = ptr_to_node->next;
-    }
+    /* Count while pointer->next != NULL */
+    for ( ; ptr_to_node != NULL; ptr_to_node = ptr_to_node->next, length++);
+
     return length;
 }
