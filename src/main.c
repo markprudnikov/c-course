@@ -5,21 +5,6 @@
 #include "clist.h"
 #include "point_list.h"
 
-int count_lines(char* file_name){
-    FILE* file = fopen(file_name, "r");
-    if (file == NULL)
-        return 0;
-    int line = 0;
-    int c;
-    while ( (c = getc(file)) != EOF ){
-        if (c == '\n'){
-            line++;
-        }
-    }
-    fclose(file);
-    return line;
-}
-
 void count_op(intrusive_node_t* node, void* data){
     (void) node;
     (*(int*)data)++;
@@ -66,16 +51,11 @@ int main(int argc, char** argv){
 
     /* Working with txt file */
     if (strcmp(argv[1], "loadtext") == 0){
-        FILE* txt_file = fopen(argv[2], "rt");
-        int a, b;
-        while(1){
-            fscanf(txt_file, "%d %d", &a, &b);
+        FILE* txt_file = fopen(argv[2], "r");
+        int x, y;
 
-            if(feof(txt_file)){
-                break;
-            }
-
-            add_point(&l, a, b);
+        while(fscanf(txt_file, "%d %d", &x, &y) == 2){
+            add_point(&l, x, y);
         }
         fclose(txt_file);
     }
@@ -83,27 +63,14 @@ int main(int argc, char** argv){
     /* Working with bin file */
     if (strcmp(argv[1], "loadbin") == 0){
         FILE* bin_file = fopen(argv[2], "rb");
-        int* x = malloc(sizeof(int));
-        int* y = malloc(sizeof(int));
+        int x,y;
+        unsigned char buf[6];
 
-        while(1){
-            unsigned char buf1[3];
-            unsigned char buf2[3];
-
-            fread(buf1, 1, 3, bin_file);
-            fread(buf2, 1, 3, bin_file);
-
-            if(feof(bin_file)){
-                break;
-            }
-
-            little_to_int(x, buf1);
-            little_to_int(y, buf2);
-
-            add_point(&l, *x, *y);
+        while(fread(buf, sizeof(unsigned char), 6, bin_file) == 6){
+            little_to_int(&x, &buf[0]);
+            little_to_int(&y, &buf[3]);
+            add_point(&l, x, y);
         }
-        free(x);
-        free(y);
         fclose(bin_file);
     }
 
